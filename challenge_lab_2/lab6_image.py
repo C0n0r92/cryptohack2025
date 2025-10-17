@@ -6,10 +6,11 @@ import sys
 BMP_HEADER_SIZE = 54
 
 def recover_image(encrypted_file, output_file, width, height):
+
     data = Path(encrypted_file).read_bytes()
     pixels = data[BMP_HEADER_SIZE:]
 
-    recovered = Image.frombytes('RGB', (width, height), pixels, 'raw', 'BGR')
+    recovered = Image.frombytes('RGB', (width, height), pixels)
     recovered = recovered.transpose(Image.FLIP_TOP_BOTTOM)  # BMP stores upside down
     recovered.save(output_file, 'BMP')
     print(f"Recovered image saved to: {output_file}")
