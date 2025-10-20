@@ -45,7 +45,7 @@ state = [
 
 
 def sub_bytes(s, sbox=s_box):
-    return [sbox[s[i][j]] for i in range(4) for j in range(4)]
+    return [sbox[val] for row in s for val in row]
 
 print(bytes(sub_bytes(state, sbox=inv_s_box)))
 
