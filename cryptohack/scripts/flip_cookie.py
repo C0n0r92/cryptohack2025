@@ -1,31 +1,18 @@
 import requests
-from Crypto.Cipher import AES
-from Crypto.Util.Padding import pad, unpad
 from Crypto.Util.number import long_to_bytes, bytes_to_long
 
-def response(byte_string):
-	url = "http://aes.cryptohack.org/ecbcbcwtf/decrypt/"
-	url += byte_string.hex()
-	url += "/"
-	r = requests.get(url)
-	js = r.json()
-	return bytes.fromhex(js["plaintext"])
-
-def encrypt_flag():
-	url = "http://aes.cryptohack.org/ecbcbcwtf/encrypt_flag/"
-	r = requests.get(url)
-	js = r.json()
-	return bytes.fromhex(js["ciphertext"])
-
 def xor(a, b):
-	return long_to_bytes(bytes_to_long(a) ^ bytes_to_long(b))
+    return long_to_bytes(bytes_to_long(a) ^ bytes_to_long(b))
 
-enc = encrypt_flag()
+cookie = bytes.fromhex(requests.get("http://aes.cryptohack.org/flipping_cookie/get_cookie/").json()["cookie"])
 
-iv = enc[:16]
-block1 = enc[16:32]
-block2 = enc[32:]
+given = b'admin=False;expi'
+expected = b'admin=True;\x05\x05\x05\x05\x05'
 
-decrypt_block1 = xor(response(block1), iv)
-decrypt_block2 = xor(response(block2), block1)
-print(decrypt_block1 + decrypt_block2)
+iv = cookie[:16]
+block1 = cookie[16:32]
+
+new = xor(xor(given, expected), iv)
+
+url = f"http://aes.cryptohack.org/flipping_cookie/check_admin/{block1.hex()}/{new.hex()}/"
+print(requests.get(url).json())
